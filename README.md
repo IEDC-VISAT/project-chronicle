@@ -33,9 +33,14 @@ chronicle-26/
 │   │   ├── SkillCard.jsx
 │   │   ├── RoadmapStep.jsx
 │   │   ├── FilterPanel.jsx
-│   │   └── BulletinPanel.jsx
+│   │   ├── BulletinPanel.jsx
+│   │   └── ProtectedRoute.jsx
+│   ├── context/
+│   │   └── AuthContext.jsx
 │   ├── pages/
 │   │   ├── Landing.jsx
+│   │   ├── Login.jsx
+│   │   ├── Signup.jsx
 │   │   ├── Dashboard.jsx
 │   │   ├── JobDetails.jsx
 │   │   ├── SkillCorner.jsx
@@ -54,6 +59,8 @@ chronicle-26/
 │   │   └── universities.js
 │   ├── hooks/
 │   │   └── useBookmarks.js
+│   ├── utils/
+│   │   └── supabaseAdapter.js
 │   ├── styles/
 │   │   └── global.css
 │   ├── App.jsx
@@ -107,12 +114,26 @@ Custom shortcuts defined in `uno.config.js`:
 ## 📱 Pages Overview
 
 ### Landing Page (`/`)
+- Public page accessible without login
 - Hero section with tagline
 - Featured "Breaking" opportunities
 - Latest entries grid
-- Quick links to all major sections (Archive, Skill Corner, Roadmap, Toolkit, FlySky)
+- Quick links to all major sections
+- Login/Signup buttons for unauthenticated users
 
-### Archive Dashboard (`/archive`)
+### Login Page (`/login`)
+- Email and password authentication
+- Error handling for invalid credentials
+- Link to signup page
+- Retro-styled form with validation
+
+### Signup Page (`/signup`)
+- Create new account with name, email, password
+- Password confirmation
+- Duplicate email prevention
+- Success message and redirect to login
+
+### Archive Dashboard (`/archive`) - Protected
 - Three-column newspaper layout
 - Left: Filter panel (type, location, domain)
 - Center: Opportunity listings
@@ -197,6 +218,13 @@ Sample data includes:
 ## 🔧 Key Features Implementation
 
 ## 🔧 Key Features Implementation
+
+### Authentication System
+- **Signup/Login**: Complete user authentication flow
+- **Session Management**: Persistent login with localStorage
+- **Protected Routes**: Automatic redirect for unauthenticated users
+- **User Profile**: Display user info in header
+- **Supabase Ready**: Easy migration path to Supabase auth
 
 ### Universal Bookmarking System
 - **Multi-type bookmarks**: Jobs, Skills, Countries, Universities, Internships, Roadmaps

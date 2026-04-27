@@ -1,23 +1,54 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { opportunities } from '../data/mockData';
 import OpportunityCard from '../components/OpportunityCard';
 
 function Landing() {
+  const { user } = useAuth();
   const featuredOpportunities = opportunities.filter(opp => opp.urgent).slice(0, 3);
   const latestOpportunities = opportunities.slice(0, 6);
 
   return (
-    <main className="max-w-7xl mx-auto px-4 py-8">
+    <div className="min-h-screen bg-retro-beige">
+      {user && (
+        <header className="bg-retro-white border-b-4 border-retro-black">
+          <div className="max-w-7xl mx-auto px-4 py-6">
+            <div className="text-center">
+              <Link to="/" className="no-underline">
+                <h1 className="retro-heading text-5xl md:text-6xl mb-2 tracking-tight">
+                  Chronicle'26
+                </h1>
+              </Link>
+              <p className="font-serif italic text-lg text-retro-brown">
+                "Documenting Your Next Opportunity"
+              </p>
+            </div>
+          </div>
+        </header>
+      )}
+      
+      <main className="max-w-7xl mx-auto px-4 py-8">
       {/* Hero Section */}
       <section className="retro-card mb-8 text-center">
         <h2 className="retro-heading text-4xl mb-4">Welcome to Chronicle'26</h2>
         <p className="font-sans text-lg mb-4 max-w-2xl mx-auto">
           Your trusted source for internship and job opportunities. Browse our archive of carefully curated positions from leading companies across various industries.
         </p>
-        <Link to="/archive" className="retro-btn-primary inline-block">
-          EXPLORE ARCHIVE
-        </Link>
+        {user ? (
+          <Link to="/archive" className="retro-btn-primary inline-block">
+            EXPLORE ARCHIVE
+          </Link>
+        ) : (
+          <div className="flex gap-4 justify-center">
+            <Link to="/login" className="retro-btn-primary inline-block">
+              LOGIN
+            </Link>
+            <Link to="/signup" className="retro-btn inline-block">
+              SIGN UP
+            </Link>
+          </div>
+        )}
       </section>
 
       {/* Featured Opportunities */}
@@ -96,8 +127,14 @@ function Landing() {
         <p className="font-serif text-sm text-retro-brown">
           Chronicle'26 © 2026 | Documenting Your Next Opportunity
         </p>
+        {!user && (
+          <p className="font-sans text-xs text-retro-brown mt-2">
+            <Link to="/login" className="underline">Login</Link> or <Link to="/signup" className="underline">Sign Up</Link> to access all features
+          </p>
+        )}
       </footer>
     </main>
+    </div>
   );
 }
 

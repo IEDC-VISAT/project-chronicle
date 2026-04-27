@@ -1,7 +1,11 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 import Header from './components/Header';
 import Landing from './pages/Landing';
+import Login from './pages/Login';
+import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import JobDetails from './pages/JobDetails';
 import Bookmarks from './pages/Bookmarks';
@@ -12,23 +16,126 @@ import Roadmap from './pages/Roadmap';
 import Toolkit from './pages/Toolkit';
 import FlySky from './pages/FlySky';
 
+function AppContent() {
+  return (
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/" element={<Landing />} />
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+
+      {/* Protected Routes */}
+      <Route
+        path="/archive"
+        element={
+          <ProtectedRoute>
+            <div className="min-h-screen bg-retro-beige">
+              <Header />
+              <Dashboard />
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/job/:id"
+        element={
+          <ProtectedRoute>
+            <div className="min-h-screen bg-retro-beige">
+              <Header />
+              <JobDetails />
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/skill-corner"
+        element={
+          <ProtectedRoute>
+            <div className="min-h-screen bg-retro-beige">
+              <Header />
+              <SkillCorner />
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/skill/:id"
+        element={
+          <ProtectedRoute>
+            <div className="min-h-screen bg-retro-beige">
+              <Header />
+              <SkillDetail />
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/roadmap"
+        element={
+          <ProtectedRoute>
+            <div className="min-h-screen bg-retro-beige">
+              <Header />
+              <Roadmap />
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/toolkit"
+        element={
+          <ProtectedRoute>
+            <div className="min-h-screen bg-retro-beige">
+              <Header />
+              <Toolkit />
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/flysky"
+        element={
+          <ProtectedRoute>
+            <div className="min-h-screen bg-retro-beige">
+              <Header />
+              <FlySky />
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/bookmarks"
+        element={
+          <ProtectedRoute>
+            <div className="min-h-screen bg-retro-beige">
+              <Header />
+              <Bookmarks />
+            </div>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/bulletin"
+        element={
+          <ProtectedRoute>
+            <div className="min-h-screen bg-retro-beige">
+              <Header />
+              <Bulletin />
+            </div>
+          </ProtectedRoute>
+        }
+      />
+
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+  );
+}
+
 function App() {
   return (
-    <div className="min-h-screen bg-retro-beige">
-      <Header />
-      <Routes>
-        <Route path="/" element={<Landing />} />
-        <Route path="/archive" element={<Dashboard />} />
-        <Route path="/job/:id" element={<JobDetails />} />
-        <Route path="/skill-corner" element={<SkillCorner />} />
-        <Route path="/skill/:id" element={<SkillDetail />} />
-        <Route path="/roadmap" element={<Roadmap />} />
-        <Route path="/toolkit" element={<Toolkit />} />
-        <Route path="/flysky" element={<FlySky />} />
-        <Route path="/bookmarks" element={<Bookmarks />} />
-        <Route path="/bulletin" element={<Bulletin />} />
-      </Routes>
-    </div>
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

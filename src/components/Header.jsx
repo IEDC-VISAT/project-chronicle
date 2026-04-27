@@ -1,23 +1,49 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
   
   const isActive = (path) => location.pathname === path;
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
   
   return (
     <header className="bg-retro-white border-b-4 border-retro-black">
       <div className="max-w-7xl mx-auto px-4 py-6">
-        <div className="text-center mb-4">
-          <Link to="/" className="no-underline">
-            <h1 className="retro-heading text-5xl md:text-6xl mb-2 tracking-tight">
-              Chronicle'26
-            </h1>
-          </Link>
-          <p className="font-serif italic text-lg text-retro-brown">
-            "Documenting Your Next Opportunity"
-          </p>
+        <div className="flex justify-between items-start mb-4">
+          <div className="text-center flex-1">
+            <Link to="/" className="no-underline">
+              <h1 className="retro-heading text-5xl md:text-6xl mb-2 tracking-tight">
+                Chronicle'26
+              </h1>
+            </Link>
+            <p className="font-serif italic text-lg text-retro-brown">
+              "Documenting Your Next Opportunity"
+            </p>
+          </div>
+          
+          {user && (
+            <div className="flex items-center gap-2">
+              <div className="text-right mr-2">
+                <p className="font-sans text-sm font-bold">{user.name}</p>
+                <p className="font-sans text-xs text-retro-brown">{user.email}</p>
+              </div>
+              <button
+                onClick={handleLogout}
+                className="retro-btn text-xs"
+                title="Logout"
+              >
+                LOGOUT
+              </button>
+            </div>
+          )}
         </div>
         
         <nav className="border-t-2 border-b-2 border-retro-black py-2 mt-4">
