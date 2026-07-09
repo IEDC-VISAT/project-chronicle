@@ -1,13 +1,70 @@
+:root {
+  --retro-beige: #f5f5dc;
+  --retro-white: #fafafa;
+  --retro-black: #1a1a1a;
+  --retro-brown: #8b7355;
+  --retro-grey: #d3d3d3;
+  --retro-blue: #003366;
+  --retro-blue-hover: #004488;
+  --retro-red: #8b0000;
+  --white: #ffffff;
+  
+  --body-bg: var(--retro-beige);
+  --body-text: #1a1a1a;
+  --scrollbar-track: #d3d3d3;
+  --scrollbar-thumb: #8b7355;
+  --scrollbar-thumb-hover: #6b5335;
+}
+
+[data-theme='dark'] {
+  --retro-beige: #050505;         /* Deep rich black */
+  --retro-white: #121212;         /* Dark grey card background */
+  --retro-black: #ffd700;         /* Gold border and active indicators */
+  --retro-brown: #cfb53b;         /* Faded gold for secondary text/metadata */
+  --retro-grey: #1a1a1a;          /* Charcoal grey for buttons/panels */
+  --retro-blue: #d4af37;          /* Classic metallic gold for primary accents */
+  --retro-blue-hover: #ffd700;    /* Bright gold on hover */
+  --retro-red: #ff4d4d;           /* Bright red for errors/alerts */
+  --white: #181818;               /* Replacement for general white panels */
+
+  --body-bg: var(--retro-beige);
+  --body-text: #eae6df;           /* Premium warm white/gold-cream for text */
+  --scrollbar-track: #121212;
+  --scrollbar-thumb: #d4af37;
+  --scrollbar-thumb-hover: #ffd700;
+}
+
 body {
   margin: 0;
   padding: 0;
-  background-color: #f5f5dc;
+  background-color: var(--body-bg);
   font-family: Arial, Helvetica, sans-serif;
-  color: #1a1a1a;
+  color: var(--body-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* Contrast overrides for dark mode */
+[data-theme='dark'] .bg-retro-black {
+  color: #000000 !important;
+}
+[data-theme='dark'] .bg-retro-blue {
+  color: #000000 !important;
+}
+[data-theme='dark'] .bg-retro-brown {
+  color: #ffffff !important;
+}
+[data-theme='dark'] .bg-retro-grey {
+  color: var(--body-text) !important;
+}
+[data-theme='dark'] a.bg-retro-black {
+  color: #000000 !important;
+}
+[data-theme='dark'] button.bg-retro-black {
+  color: #000000 !important;
 }
 
 /* Retro grain texture */
@@ -31,15 +88,16 @@ body::before {
 }
 
 ::-webkit-scrollbar-track {
-  background: #d3d3d3;
-  border: 2px solid #1a1a1a;
+  background: var(--scrollbar-track);
+  border: 2px solid var(--retro-black);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #8b7355;
-  border: 2px solid #1a1a1a;
+  background: var(--scrollbar-thumb);
+  border: 2px solid var(--retro-black);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6b5335;
+  background: var(--scrollbar-thumb-hover);
 }
+

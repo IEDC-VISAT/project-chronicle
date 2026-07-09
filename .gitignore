@@ -48,3 +48,6 @@ coverage.xml
 *.cover
 .hypothesis/
 
+# Django static files compiled in build step
+staticfiles/
+backend/staticfiles/

@@ -1,6 +1,8 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider } from './context/ThemeContext';
+import ThemeToggle from './components/ThemeToggle';
 import { DataProvider } from './context/DataContext';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -62,11 +64,14 @@ function AppContent() {
 
 function App() {
   return (
-    <AuthProvider>
-      <DataProvider>
-        <AppContent />
-      </DataProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <DataProvider>
+          <AppContent />
+          <ThemeToggle />
+        </DataProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 }
 

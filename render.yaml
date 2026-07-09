@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: chronicle-backend
+    runtime: python
+    buildCommand: "bash backend/build.sh"
+    startCommand: "gunicorn --chdir backend chronicle.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: chronicle-db
+          property: connectionString
+      - key: CORS_ALLOW_ALL_ORIGINS
+        value: "True"
+
+databases:
+  - name: chronicle-db
+    databaseName: chronicle
+    user: chronicle_user

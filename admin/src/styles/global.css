@@ -1,13 +1,90 @@
+:root {
+  --admin-grey: #c0c0c0;
+  --admin-dark: #808080;
+  --admin-white: #f0f0f0;
+  --admin-black: #1a1a1a;
+  --admin-blue: #003366;
+  --admin-blue-hover: #004488;
+  --admin-red: #8b0000;
+  --admin-green: #2d5016;
+  --white: #ffffff;
+  
+  --body-bg: var(--admin-grey);
+  --body-text: #1a1a1a;
+  --scrollbar-track: #d3d3d3;
+  --scrollbar-thumb: #808080;
+  --scrollbar-thumb-hover: #606060;
+  
+  --modal-bg: #f0f0f0;
+  --modal-header-bg: #003366;
+  --modal-header-text: white;
+}
+
+[data-theme='dark'] {
+  --admin-grey: #050505;          /* Deep rich black */
+  --admin-dark: #cfb53b;          /* Faded gold for secondary text/details */
+  --admin-white: #121212;         /* Dark grey card background */
+  --admin-black: #ffd700;         /* Gold border and outlines */
+  --admin-blue: #d4af37;          /* Classic metallic gold for primary backgrounds & accents */
+  --admin-blue-hover: #ffd700;    /* Bright gold on hover */
+  --admin-red: #ff4d4d;           /* Bright red for warnings/errors */
+  --admin-green: #4ade80;         /* Bright green for success metrics/actions */
+  --white: #181818;               /* Replacement for general white panels */
+
+  --body-bg: var(--admin-grey);
+  --body-text: #eae6df;           /* Premium warm white/gold-cream for text */
+  --scrollbar-track: #121212;
+  --scrollbar-thumb: #d4af37;
+  --scrollbar-thumb-hover: #ffd700;
+  
+  --modal-bg: #121212;
+  --modal-header-bg: #d4af37;
+  --modal-header-text: #000000;
+}
+
 body {
   margin: 0;
   padding: 0;
-  background-color: #c0c0c0;
+  background-color: var(--body-bg);
   font-family: Arial, Helvetica, sans-serif;
-  color: #1a1a1a;
+  color: var(--body-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 * {
   box-sizing: border-box;
+}
+
+/* Contrast overrides for dark mode */
+[data-theme='dark'] .bg-admin-black {
+  color: #000000 !important;
+}
+[data-theme='dark'] .bg-admin-blue {
+  color: #000000 !important;
+}
+[data-theme='dark'] .bg-admin-dark {
+  color: #000000 !important;
+}
+[data-theme='dark'] .bg-admin-grey {
+  color: var(--body-text) !important;
+}
+[data-theme='dark'] a.bg-admin-black {
+  color: #000000 !important;
+}
+[data-theme='dark'] button.bg-admin-black {
+  color: #000000 !important;
+}
+[data-theme='dark'] .text-admin-black {
+  color: var(--admin-black) !important;
+}
+[data-theme='dark'] input {
+  color: var(--body-text) !important;
+}
+[data-theme='dark'] select {
+  color: var(--body-text) !important;
+}
+[data-theme='dark'] textarea {
+  color: var(--body-text) !important;
 }
 
 /* Scrollbar styling */
@@ -17,17 +94,17 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #d3d3d3;
-  border: 2px solid #1a1a1a;
+  background: var(--scrollbar-track);
+  border: 2px solid var(--admin-black);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #808080;
-  border: 2px solid #1a1a1a;
+  background: var(--scrollbar-thumb);
+  border: 2px solid var(--admin-black);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #606060;
+  background: var(--scrollbar-thumb-hover);
 }
 
 /* Modal overlay */
@@ -37,7 +114,7 @@ body {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -45,9 +122,9 @@ body {
 }
 
 .modal-content {
-  background: #f0f0f0;
-  border: 3px solid #1a1a1a;
-  box-shadow: 4px 4px 0px 0px rgba(0, 0, 0, 1);
+  background: var(--modal-bg);
+  border: 3px solid var(--admin-black);
+  box-shadow: 4px 4px 0px 0px var(--admin-black);
   max-width: 90%;
   max-height: 90vh;
   overflow-y: auto;
@@ -55,15 +132,16 @@ body {
 }
 
 .modal-header {
-  background: #003366;
-  color: white;
+  background: var(--modal-header-bg);
+  color: var(--modal-header-text);
   padding: 8px 12px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border-bottom: 2px solid #1a1a1a;
+  border-bottom: 2px solid var(--admin-black);
 }
 
 .modal-body {
   padding: 20px;
 }
+
