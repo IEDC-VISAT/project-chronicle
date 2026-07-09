@@ -1,4 +1,4 @@
-﻿"""
+"""
 Seed command: loads all static JS data into the SQLite database.
 Run with: python manage.py seed_data
 """
@@ -25,21 +25,20 @@ class Command(BaseCommand):
         self._seed_toolkit()
         self._seed_flysky()
 
-        self.stdout.write(self.style.SUCCESS('âœ… Database seeded successfully!'))
+        self.stdout.write(self.style.SUCCESS('[SUCCESS] Database seeded successfully!'))
 
-    # â”€â”€ Admin User â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # -- Admin User --
     def _seed_superuser(self):
         if not User.objects.filter(username='admin').exists():
             User.objects.create_superuser('admin', 'admin@chronicle.com', 'admin123')
-            self.stdout.write('  âœ“ Admin user created (admin / admin123)')
+            self.stdout.write('  [OK] Admin user created (admin / admin123)')
         else:
             self.stdout.write('  - Admin user already exists, skipping')
 
-    # â”€â”€ Jobs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # -- Jobs --
     def _seed_jobs(self):
-        if Job.objects.exists():
-            self.stdout.write('  - Jobs already seeded, skipping')
-            return
+        # Clear existing to support clean updates and fix encoding
+        Job.objects.all().delete()
 
         jobs = [
             {
@@ -141,108 +140,105 @@ class Command(BaseCommand):
         ]
         for job_data in jobs:
             Job.objects.create(**job_data)
-        self.stdout.write(f'  âœ“ Seeded {len(jobs)} jobs')
+        self.stdout.write(f'  [OK] Seeded {len(jobs)} jobs')
 
-    # â”€â”€ Bulletins â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # -- Bulletins --
     def _seed_bulletins(self):
-        if Bulletin.objects.exists():
-            self.stdout.write('  - Bulletins already seeded, skipping')
-            return
+        # Clear existing to support clean updates and fix encoding
+        Bulletin.objects.all().delete()
 
         bulletins = [
             {'title': 'New Internship Added', 'content': 'Software Engineering Intern position now available at TechCorp Industries. Apply before May 15th!', 'urgent': True},
             {'title': 'Career Fair Announcement', 'content': 'Annual Tech Career Fair scheduled for May 10th. Register now to meet top employers.', 'urgent': False},
             {'title': 'Resume Workshop', 'content': 'Free resume review sessions available every Tuesday. Book your slot in the Career Center.', 'urgent': False},
-            {'title': 'Breaking: Multiple Openings', 'content': 'Data Science Intern and Full Stack Developer positions added today. Check the Archive for details.', 'urgent': True},
-            {'title': 'Interview Tips Session', 'content': 'Join us for a virtual session on mastering technical interviews. Thursday at 3 PM.', 'urgent': False},
+            {'title': 'Scholarship Deadline', 'content': 'DAAD Scholarship applications close on June 30th. Check the FlySky section for details.', 'urgent': True},
+            {'title': 'New Course in Skill Corner', 'content': 'Introduction to DevOps course now live. Learn Docker, CI/CD, and Cloud deployment.', 'urgent': False},
         ]
-        for b in bulletins:
-            Bulletin.objects.create(**b)
-        self.stdout.write(f'  âœ“ Seeded {len(bulletins)} bulletins')
+        for b_data in bulletins:
+            Bulletin.objects.create(**b_data)
+        self.stdout.write(f'  [OK] Seeded {len(bulletins)} bulletins')
 
-    # â”€â”€ Skills â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # -- Skills --
     def _seed_skills(self):
-        if Skill.objects.exists():
-            self.stdout.write('  - Skills already seeded, skipping')
-            return
+        # Clear existing to support clean updates and fix encoding
+        Skill.objects.all().delete()
 
         skills = [
             {
-                'name': 'React Development',
+                'name': 'React',
                 'category': 'Web Development',
                 'difficulty': 'Intermediate',
                 'trending': True,
-                'editors_pick': False,
-                'tags': ['Free', 'Certification'],
-                'description': 'Master modern React development with hooks, state management, and component architecture.',
-                'how_to_learn': ['Learn JavaScript fundamentals and ES6+ features', 'Understand components, props, and state', 'Master React hooks (useState, useEffect, useContext)', 'Learn state management with Context API or Redux', 'Build real-world projects and deploy them'],
-                'where_to_learn': [{'name': 'React Official Documentation', 'type': 'Documentation', 'url': 'https://react.dev'}, {'name': 'freeCodeCamp React Course', 'type': 'YouTube', 'url': 'https://youtube.com'}, {'name': 'Scrimba React Course', 'type': 'Interactive', 'url': 'https://scrimba.com'}],
+                'editors_pick': True,
+                'tags': ['Frontend', 'JavaScript', 'UI'],
+                'description': 'React is a popular JavaScript library for building user interfaces, particularly single-page applications. It\'s maintained by Meta and a community of individual developers and companies.',
+                'how_to_learn': ['Learn basic HTML, CSS, and modern JavaScript (ES6+)', 'Understand React components, props, and state', 'Master React Hooks (useState, useEffect)', 'Build small projects like a calculator or weather app', 'Learn state management (Context API or Redux)'],
+                'where_to_learn': ['React Official Documentation (react.dev)', 'freeCodeCamp React Course (YouTube)', 'Scrimba Learn React Course', 'Academind React Guide (Udemy)'],
             },
             {
-                'name': 'Python Programming',
+                'name': 'Python',
                 'category': 'Programming',
                 'difficulty': 'Beginner',
                 'trending': True,
+                'editors_pick': False,
+                'tags': ['Backend', 'Data Science', 'Scripting'],
+                'description': 'Python is a high-level, general-purpose programming language known for its readability and versatility. It\'s widely used in data science, web development, automation, and AI.',
+                'how_to_learn': ['Learn basic syntax, variables, and data types', 'Understand control flow (if/else, loops)', 'Learn functions and basic Object-Oriented Programming', 'Practice problem-solving on platforms like HackerRank', 'Build small automation scripts or simple web scrapers'],
+                'where_to_learn': ['Python.org Official Tutorial', 'Programming with Mosh Python Course (YouTube)', 'Automate the Boring Stuff with Python (Book/Course)', 'Python Crash Course by Eric Matthes (Book)'],
+            },
+            {
+                'name': 'Figma',
+                'category': 'Design',
+                'difficulty': 'Beginner',
+                'trending': True,
                 'editors_pick': True,
-                'tags': ['Free'],
-                'description': 'Start your programming journey with Python, one of the most versatile languages.',
-                'how_to_learn': ['Learn basic syntax and data types', 'Practice with loops, conditions, and functions', 'Understand OOP concepts', 'Work with libraries like NumPy and Pandas', 'Build automation scripts and small projects'],
-                'where_to_learn': [{'name': 'Python.org Official Tutorial', 'type': 'Documentation', 'url': 'https://python.org'}, {'name': 'CS50P Python Course', 'type': 'Course', 'url': 'https://cs50.harvard.edu'}, {'name': 'Automate the Boring Stuff', 'type': 'Book', 'url': 'https://automatetheboringstuff.com'}],
+                'tags': ['UI/UX', 'Design Tool', 'Prototyping'],
+                'description': 'Figma is a collaborative web-based design tool widely used for UI/UX design, prototyping, and vector graphics. It allows teams to work together in real-time.',
+                'how_to_learn': ['Familiarize yourself with the interface and basic tools', 'Learn about frames, vectors, and boolean operations', 'Understand auto-layout and components', 'Practice designing simple screens and creating prototypes', 'Study design systems and UI kits'],
+                'where_to_learn': ['Figma Youtube Channel (Figma Tutorials)', 'Figma Learn Portal (learn.figma.com)', 'UX Collective Articles', 'Design+Code Figma Course'],
+            },
+            {
+                'name': 'Node.js',
+                'category': 'Web Development',
+                'difficulty': 'Intermediate',
+                'trending': False,
+                'editors_pick': False,
+                'tags': ['Backend', 'JavaScript', 'APIs'],
+                'description': 'Node.js is an open-source, cross-platform JavaScript runtime environment that executes JavaScript code outside a web browser, typically on servers.',
+                'how_to_learn': ['Learn JavaScript fundamentals and asynchronous programming', 'Understand Node.js event loop and core modules', 'Learn Express.js framework for building APIs', 'Work with databases (MongoDB or PostgreSQL)', 'Build a full CRUD application'],
+                'where_to_learn': ['Node.js Official Guides', 'The Net Ninja Node.js Tutorial (YouTube)', 'Express.js official documentation', 'Node.js Developer Course by Andrew Mead (Udemy)'],
             },
             {
                 'name': 'Machine Learning',
-                'category': 'Data Science',
+                'category': 'AI & Machine Learning',
                 'difficulty': 'Advanced',
                 'trending': True,
                 'editors_pick': True,
-                'tags': ['Certification', 'High Demand'],
-                'description': 'Dive into machine learning algorithms, neural networks, and AI applications.',
-                'how_to_learn': ['Master Python and statistics basics', 'Learn scikit-learn for classical ML', 'Understand deep learning with TensorFlow/PyTorch', 'Practice on Kaggle datasets', 'Build and deploy ML models'],
-                'where_to_learn': [{'name': 'Coursera ML Specialization', 'type': 'Course', 'url': 'https://coursera.org'}, {'name': 'fast.ai', 'type': 'Course', 'url': 'https://fast.ai'}, {'name': 'Kaggle Learn', 'type': 'Interactive', 'url': 'https://kaggle.com/learn'}],
+                'tags': ['Python', 'Algorithms', 'AI'],
+                'description': 'Machine Learning is a field of inquiry devoted to understanding and building methods that "learn", that is, methods that leverage data to improve performance on some set of tasks.',
+                'how_to_learn': ['Master Python and libraries (NumPy, Pandas, Matplotlib)', 'Learn statistics, probability, and linear algebra', 'Understand core ML algorithms (Regression, Classification, Clustering)', 'Use Scikit-learn to build and evaluate models', 'Work on real-world datasets (Kaggle)'],
+                'where_to_learn': ['Andrew Ng\'s Machine Learning Specialization (Coursera)', 'Hands-On Machine Learning (Book by Aur\u00e9lien G\u00e9ron)', 'Kaggle Learn Courses', 'Fast.ai Practical Deep Learning for Coders'],
             },
             {
-                'name': 'UI/UX Design',
-                'category': 'Design',
-                'difficulty': 'Intermediate',
-                'trending': False,
-                'editors_pick': True,
-                'tags': ['Free', 'Portfolio'],
-                'description': 'Learn user interface and experience design principles with modern tools like Figma.',
-                'how_to_learn': ['Understand design principles and typography', 'Learn Figma for wireframing and prototyping', 'Study user research methods', 'Practice designing real apps', 'Build a design portfolio'],
-                'where_to_learn': [{'name': 'Google UX Design Certificate', 'type': 'Course', 'url': 'https://coursera.org'}, {'name': 'Figma Official Tutorials', 'type': 'Documentation', 'url': 'https://figma.com'}, {'name': 'Dribbble for Inspiration', 'type': 'Community', 'url': 'https://dribbble.com'}],
-            },
-            {
-                'name': 'Cloud Computing (AWS)',
+                'name': 'Docker',
                 'category': 'Cloud & DevOps',
                 'difficulty': 'Intermediate',
                 'trending': True,
                 'editors_pick': False,
-                'tags': ['Certification', 'High Demand', 'Paid'],
-                'description': 'Master Amazon Web Services â€” the world\'s leading cloud platform.',
-                'how_to_learn': ['Understand cloud fundamentals (IaaS, PaaS, SaaS)', 'Learn core AWS services (EC2, S3, RDS, Lambda)', 'Practice with AWS Free Tier', 'Study for AWS Cloud Practitioner certification', 'Build cloud-native projects'],
-                'where_to_learn': [{'name': 'AWS Official Training', 'type': 'Course', 'url': 'https://aws.amazon.com/training'}, {'name': 'A Cloud Guru', 'type': 'Course', 'url': 'https://acloudguru.com'}, {'name': 'AWS Free Tier', 'type': 'Hands-On', 'url': 'https://aws.amazon.com/free'}],
-            },
-            {
-                'name': 'Data Analysis with Excel',
-                'category': 'Data Science',
-                'difficulty': 'Beginner',
-                'trending': False,
-                'editors_pick': False,
-                'tags': ['Free', 'Business'],
-                'description': 'Master Excel for data analysis, visualization, and business intelligence.',
-                'how_to_learn': ['Learn Excel formulas and functions', 'Master pivot tables and charts', 'Understand data cleaning techniques', 'Learn Power Query for data transformation', 'Practice with real business datasets'],
-                'where_to_learn': [{'name': 'ExcelJet', 'type': 'Documentation', 'url': 'https://exceljet.net'}, {'name': 'Microsoft Excel Training', 'type': 'Course', 'url': 'https://support.microsoft.com'}, {'name': 'Chandoo.org', 'type': 'Blog', 'url': 'https://chandoo.org'}],
+                'tags': ['DevOps', 'Containers', 'Deployment'],
+                'description': 'Docker is a set of platform as a service products that use OS-level virtualization to deliver software in packages called containers.',
+                'how_to_learn': ['Understand the difference between VMs and containers', 'Learn basic Docker commands (run, build, ps, images)', 'Write your own Dockerfiles to containerize apps', 'Learn about Docker Compose for multi-container apps', 'Understand basic container networking and volumes'],
+                'where_to_learn': ['Docker Official Documentation', 'Docker for Beginners (TechWorld with Nana - YouTube)', 'Docker Mastery Course by Bret Fisher (Udemy)', 'Play with Docker classroom'],
             },
         ]
-        for s in skills:
-            Skill.objects.create(**s)
-        self.stdout.write(f'  âœ“ Seeded {len(skills)} skills')
+        for s_data in skills:
+            Skill.objects.create(**s_data)
+        self.stdout.write(f'  [OK] Seeded {len(skills)} skills')
 
-    # â”€â”€ Roadmaps â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # -- Roadmaps --
     def _seed_roadmaps(self):
-        if Roadmap.objects.exists():
-            self.stdout.write('  - Roadmaps already seeded, skipping')
-            return
+        # Clear existing to support clean updates and fix encoding
+        Roadmap.objects.all().delete()
 
         roadmaps = [
             {
@@ -258,7 +254,7 @@ class Command(BaseCommand):
             },
             {
                 'role': 'Data Scientist',
-                'description': 'From statistics to machine learning â€” your path to data science',
+                'description': 'From statistics to machine learning \u2014 your path to data science',
                 'steps': [
                     {'id': 1, 'title': 'Mathematics & Statistics', 'duration': '2-3 months', 'skills': ['Linear algebra basics', 'Statistics and probability', 'Calculus fundamentals', 'Python for data science'], 'resources': ['Khan Academy Statistics', '3Blue1Brown Linear Algebra', 'Think Stats book'], 'projects': ['Statistical analysis of a dataset', 'Probability simulations', 'EDA on Kaggle datasets']},
                     {'id': 2, 'title': 'Data Analysis & Visualization', 'duration': '2-3 months', 'skills': ['Pandas and NumPy', 'Data cleaning and wrangling', 'Matplotlib and Seaborn', 'SQL for data querying'], 'resources': ['Pandas documentation', 'Python for Data Analysis book', 'Mode Analytics SQL tutorial'], 'projects': ['Analyze a real-world dataset', 'Create interactive visualizations', 'Build a data pipeline']},
@@ -280,13 +276,14 @@ class Command(BaseCommand):
         ]
         for r in roadmaps:
             Roadmap.objects.create(**r)
-        self.stdout.write(f'  âœ“ Seeded {len(roadmaps)} roadmaps')
+        self.stdout.write(f'  [OK] Seeded {len(roadmaps)} roadmaps')
 
-    # â”€â”€ Toolkit â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # -- Toolkit --
     def _seed_toolkit(self):
-        if ResumeTemplate.objects.exists():
-            self.stdout.write('  - Toolkit already seeded, skipping')
-            return
+        # Clear existing to support clean updates and fix encoding
+        ResumeTemplate.objects.all().delete()
+        Prompt.objects.all().delete()
+        LinkedInField.objects.all().delete()
 
         templates = [
             {'name': 'Classic Professional', 'description': 'Traditional format perfect for corporate roles', 'style': 'Formal, single-column layout with clear sections', 'best_for': 'Finance, Consulting, Traditional Industries'},
@@ -312,44 +309,45 @@ class Command(BaseCommand):
             {
                 'field_name': 'Web Developer',
                 'headline': 'Full Stack Web Developer | React, Node.js, MongoDB | Building Scalable Web Applications',
-                'about': 'Passionate web developer with expertise in modern JavaScript frameworks and full-stack development. I specialize in creating responsive, user-friendly web applications.\n\nðŸ”§ Technical Skills:\nâ€¢ Frontend: React, JavaScript, HTML5, CSS3\nâ€¢ Backend: Node.js, Express, RESTful APIs\nâ€¢ Database: MongoDB, PostgreSQL\nâ€¢ Tools: Git, Docker, AWS\n\nðŸ’¡ What I Do:\nI transform ideas into functional, elegant web solutions. Let\'s connect and build something amazing!',
+                'about': 'Passionate web developer with expertise in modern JavaScript frameworks and full-stack development. I specialize in creating responsive, user-friendly web applications.\n\n\U0001f527 Technical Skills:\n\u2022 Frontend: React, JavaScript, HTML5, CSS3\n\u2022 Backend: Node.js, Express, RESTful APIs\n\u2022 Database: MongoDB, PostgreSQL\n\u2022 Tools: Git, Docker, AWS\n\n\u2728 What I Do:\nI transform ideas into functional, elegant web solutions. Let\'s connect and build something amazing!',
             },
             {
                 'field_name': 'Data Scientist',
                 'headline': 'Data Scientist | Machine Learning | Python, SQL | Turning Data into Actionable Insights',
-                'about': 'Data scientist passionate about extracting meaningful insights from complex datasets and building predictive models.\n\nðŸ“Š Core Competencies:\nâ€¢ Machine Learning: Scikit-learn, TensorFlow, PyTorch\nâ€¢ Data Analysis: Python, Pandas, NumPy\nâ€¢ Visualization: Matplotlib, Seaborn, Tableau\n\nðŸ” What I Do:\nI bridge the gap between data and decision-making. Always exploring new ML techniques.',
+                'about': 'Data scientist passionate about extracting meaningful insights from complex datasets and building predictive models.\n\n\U0001f4ca Core Competencies:\n\u2022 Machine Learning: Scikit-learn, TensorFlow, PyTorch\n\u2022 Data Analysis: Python, Pandas, NumPy\n\u2022 Visualization: Matplotlib, Seaborn, Tableau\n\n\u2728 What I Do:\nI bridge the gap between data and decision-making. Always exploring new ML techniques.',
             },
             {
                 'field_name': 'Software Engineer',
                 'headline': 'Software Engineer | Full Stack Development | Cloud Architecture | Problem Solver',
-                'about': 'Software engineer dedicated to building robust, scalable applications and solving complex technical challenges.\n\nðŸ’» Technical Expertise:\nâ€¢ Languages: Python, JavaScript, Java, Go\nâ€¢ Frameworks: React, Django, Spring Boot\nâ€¢ Cloud: AWS, Azure, Docker, Kubernetes\n\nðŸŽ¯ Achievements:\nâ€¢ Architected microservices handling 1M+ daily requests\nâ€¢ Reduced application load time by 40%\n\nLet\'s connect and discuss technology!',
+                'about': 'Software engineer dedicated to building robust, scalable applications and solving complex technical challenges.\n\n\u2728 Technical Expertise:\n\u2022 Languages: Python, JavaScript, Java, Go\n\u2022 Frameworks: React, Django, Spring Boot\n\u2022 Cloud: AWS, Azure, Docker, Kubernetes\n\n\u2728 Achievements:\n\u2022 Architected microservices handling 1M+ daily requests\n\u2022 Reduced application load time by 40%\n\nLet\'s connect and discuss technology!',
             },
             {
                 'field_name': 'UI/UX Designer',
                 'headline': 'UI/UX Designer | User-Centered Design | Figma Expert | Creating Delightful Digital Experiences',
-                'about': 'UI/UX designer passionate about creating intuitive, accessible, and visually appealing digital experiences.\n\nðŸŽ¨ Design Skills:\nâ€¢ Tools: Figma, Adobe XD, Sketch\nâ€¢ Research: User interviews, usability testing\nâ€¢ Principles: Accessibility, responsive design\n\nâœ¨ What I Do:\nI transform complex problems into simple, elegant solutions through user-centered design.',
+                'about': 'UI/UX designer passionate about creating intuitive, accessible, and visually appealing digital experiences.\n\n\U0001f3a8 Design Skills:\n\u2022 Tools: Figma, Adobe XD, Sketch\n\u2022 Research: User interviews, usability testing\n\u2022 Principles: Accessibility, responsive design\n\n\u2728 What I Do:\nI transform complex problems into simple, elegant solutions through user-centered design.',
             },
             {
                 'field_name': 'DevOps Engineer',
                 'headline': 'DevOps Engineer | Cloud Infrastructure | CI/CD | Kubernetes | Automation Enthusiast',
-                'about': 'DevOps engineer focused on building reliable, scalable infrastructure and streamlining development workflows.\n\nâš™ï¸ Technical Stack:\nâ€¢ Cloud: AWS, Azure, GCP\nâ€¢ Containers: Docker, Kubernetes, Helm\nâ€¢ CI/CD: Jenkins, GitHub Actions\nâ€¢ IaC: Terraform, Ansible\n\nðŸš€ What I Do:\nI bridge development and operations, implementing DevOps practices that accelerate delivery.',
+                'about': 'DevOps engineer focused on building reliable, scalable infrastructure and streamlining development workflows.\n\n\u2699\ufe0f Technical Stack:\n\u2022 Cloud: AWS, Azure, GCP\n\u2022 Containers: Docker, Kubernetes, Helm\n\u2022 CI/CD: Jenkins, GitHub Actions\n\u2022 IaC: Terraform, Ansible\n\n\U0001f680 What I Do:\nI bridge development and operations, implementing DevOps practices that accelerate delivery.',
             },
         ]
         for lf in linkedin_fields:
             LinkedInField.objects.create(**lf)
 
-        self.stdout.write(f'  âœ“ Seeded {len(templates)} templates, {len(prompts)} prompts, {len(linkedin_fields)} LinkedIn fields')
+        self.stdout.write(f'  [OK] Seeded {len(templates)} templates, {len(prompts)} prompts, {len(linkedin_fields)} LinkedIn fields')
 
-    # â”€â”€ FlySky â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    # -- FlySky --
     def _seed_flysky(self):
-        if Country.objects.exists():
-            self.stdout.write('  - FlySky data already seeded, skipping')
-            return
+        # Clear existing to support clean updates and fix encoding
+        Country.objects.all().delete()
+        University.objects.all().delete()
+        Internship.objects.all().delete()
 
         countries = [
             {
                 'name': 'United States',
-                'flag': 'ðŸ‡ºðŸ‡¸',
+                'flag': '\U0001f1fa\U0001f1f8',
                 'description': 'Home to world-renowned universities and diverse academic programs',
                 'requirements': ['Valid passport', 'University acceptance letter (I-20)', 'F-1 Student Visa', 'Proof of financial support', 'Academic transcripts'],
                 'popular_universities': ['MIT', 'Stanford University', 'Harvard University', 'Caltech', 'Carnegie Mellon'],
@@ -357,15 +355,15 @@ class Command(BaseCommand):
             },
             {
                 'name': 'Germany',
-                'flag': 'ðŸ‡©ðŸ‡ª',
+                'flag': '\U0001f1e9\U0001f1ea',
                 'description': 'Quality education with low or no tuition fees at public universities',
-                'requirements': ['Valid passport', 'University admission letter', 'Student visa (National Visa)', 'Blocked account (â‚¬11,208 minimum)', 'Health insurance'],
+                'requirements': ['Valid passport', 'University admission letter', 'Student visa (National Visa)', 'Blocked account (\u20ac11,208 minimum)', 'Health insurance'],
                 'popular_universities': ['TU Munich', 'LMU Munich', 'Heidelberg University', 'Humboldt University', 'KIT'],
-                'scholarships': ['DAAD Scholarships', 'Erasmus+', 'Heinrich BÃ¶ll Foundation'],
+                'scholarships': ['DAAD Scholarships', 'Erasmus+', 'Heinrich B\u00f6ll Foundation'],
             },
             {
                 'name': 'Canada',
-                'flag': 'ðŸ‡¨ðŸ‡¦',
+                'flag': '\U0001f1e8\U0001f1e6',
                 'description': 'Welcoming immigration policies and high-quality education system',
                 'requirements': ['Valid passport', 'Canadian study permit', 'University acceptance letter', 'Proof of financial support', 'IELTS/TOEFL scores'],
                 'popular_universities': ['University of Toronto', 'McGill University', 'UBC', 'University of Waterloo', 'McMaster'],
@@ -373,7 +371,7 @@ class Command(BaseCommand):
             },
             {
                 'name': 'United Kingdom',
-                'flag': 'ðŸ‡¬ðŸ‡§',
+                'flag': '\U0001f1ec\U0001f1e7',
                 'description': 'World-class universities with rich academic traditions',
                 'requirements': ['Valid passport', 'Student Visa (Tier 4)', 'CAS from university', 'IELTS 6.0+', 'Proof of financial support'],
                 'popular_universities': ['Oxford University', 'Cambridge University', 'Imperial College London', 'UCL', 'LSE'],
@@ -381,7 +379,7 @@ class Command(BaseCommand):
             },
             {
                 'name': 'Australia',
-                'flag': 'ðŸ‡¦ðŸ‡º',
+                'flag': '\U0001f1e6\U0001f1fa',
                 'description': 'High quality of life with excellent research opportunities',
                 'requirements': ['Valid passport', 'Student Visa (subclass 500)', 'CoE from institution', 'IELTS 6.0+', 'Overseas Student Health Cover'],
                 'popular_universities': ['ANU', 'University of Melbourne', 'University of Sydney', 'UNSW', 'Monash University'],
@@ -394,20 +392,20 @@ class Command(BaseCommand):
         universities = [
             {'name': 'MIT', 'country': 'United States', 'program': 'Computer Science', 'ranking': 1, 'tuition': '$57,986/year', 'acceptance_rate': '4%', 'description': 'Leading STEM research university'},
             {'name': 'Stanford University', 'country': 'United States', 'program': 'Engineering', 'ranking': 3, 'tuition': '$58,416/year', 'acceptance_rate': '4.7%', 'description': 'World-class research and entrepreneurship hub'},
-            {'name': 'TU Munich', 'country': 'Germany', 'program': 'Engineering', 'ranking': 50, 'tuition': 'â‚¬0 (no tuition)', 'acceptance_rate': '8%', 'description': 'Top German technical university'},
+            {'name': 'TU Munich', 'country': 'Germany', 'program': 'Engineering', 'ranking': 50, 'tuition': '\u20ac0 (no tuition)', 'acceptance_rate': '8%', 'description': 'Top German technical university'},
             {'name': 'University of Toronto', 'country': 'Canada', 'program': 'Computer Science', 'ranking': 25, 'tuition': 'CAD $45,000/year', 'acceptance_rate': '43%', 'description': "Canada's top research university"},
-            {'name': 'Oxford University', 'country': 'United Kingdom', 'program': 'All Programs', 'ranking': 4, 'tuition': 'Â£26,770-Â£37,510/year', 'acceptance_rate': '18%', 'description': 'One of the world\'s oldest and most prestigious universities'},
+            {'name': 'Oxford University', 'country': 'United Kingdom', 'program': 'All Programs', 'ranking': 4, 'tuition': '\u00a326,770-\u00a337,510/year', 'acceptance_rate': '18%', 'description': 'One of the world\'s oldest and most prestigious universities'},
             {'name': 'University of Melbourne', 'country': 'Australia', 'program': 'Business', 'ranking': 33, 'tuition': 'AUD $35,000-$45,000/year', 'acceptance_rate': '70%', 'description': "Australia's leading research university"},
         ]
         for u in universities:
             University.objects.create(**u)
 
         internships = [
-            {'title': 'Software Engineering Intern', 'company': 'Google EMEA', 'location': 'Dublin, Ireland', 'type': 'International', 'duration': '12 weeks', 'stipend': 'â‚¬4,000/month', 'description': 'Work on Google products affecting millions of users', 'requirements': ['Computer Science degree', 'Strong coding skills', 'Algorithm knowledge']},
-            {'title': 'Research Intern', 'company': 'Max Planck Institute', 'location': 'Munich, Germany', 'type': 'Research', 'duration': '6 months', 'stipend': 'â‚¬1,500/month', 'description': 'Conduct cutting-edge research in computer science or life sciences', 'requirements': ['Master\'s student or above', 'Research experience', 'Publication record preferred']},
-            {'title': 'Business Analyst Intern', 'company': 'McKinsey & Company', 'location': 'London, UK', 'type': 'Corporate', 'duration': '8 weeks', 'stipend': 'Â£4,500/month', 'description': 'Work on consulting projects for global Fortune 500 companies', 'requirements': ['Top academic performance', 'Strong analytical skills', 'Leadership experience']},
+            {'title': 'Software Engineering Intern', 'company': 'Google EMEA', 'location': 'Dublin, Ireland', 'type': 'International', 'duration': '12 weeks', 'stipend': '\u20ac4,000/month', 'description': 'Work on Google products affecting millions of users', 'requirements': ['Computer Science degree', 'Strong coding skills', 'Algorithm knowledge']},
+            {'title': 'Research Intern', 'company': 'Max Planck Institute', 'location': 'Munich, Germany', 'type': 'Research', 'duration': '6 months', 'stipend': '\u20ac1,500/month', 'description': 'Conduct cutting-edge research in computer science or life sciences', 'requirements': ['Master\'s student or above', 'Research experience', 'Publication record preferred']},
+            {'title': 'Business Analyst Intern', 'company': 'McKinsey & Company', 'location': 'London, UK', 'type': 'Corporate', 'duration': '8 weeks', 'stipend': '\u00a34,500/month', 'description': 'Work on consulting projects for global Fortune 500 companies', 'requirements': ['Top academic performance', 'Strong analytical skills', 'Leadership experience']},
         ]
         for i in internships:
             Internship.objects.create(**i)
 
-        self.stdout.write(f'  âœ“ Seeded {len(countries)} countries, {len(universities)} universities, {len(internships)} internships')
+        self.stdout.write(f'  [OK] Seeded {len(countries)} countries, {len(universities)} universities, {len(internships)} internships')
