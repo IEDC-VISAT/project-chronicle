@@ -3,7 +3,7 @@ import { useData } from '../context/DataContext';
 import { Link } from 'react-router-dom';
 
 function Dashboard() {
-  const { data } = useData();
+  const { data, loading } = useData();
 
   const stats = [
     { label: 'Total Jobs', value: data.jobs.length, icon: '💼', color: 'bg-admin-blue', link: '/jobs' },

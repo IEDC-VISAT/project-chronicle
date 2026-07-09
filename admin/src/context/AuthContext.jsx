@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import adminApi from '../utils/api';
 
 const AuthContext = createContext();
 
@@ -8,32 +9,43 @@ export function useAuth() {
 
 export function AuthProvider({ children }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const auth = localStorage.getItem('chronicle_admin_auth');
-    if (auth === 'true') {
+    const token = localStorage.getItem('chronicle_admin_access_token');
+    const storedUser = localStorage.getItem('chronicle_admin_user');
+    if (token && storedUser) {
       setIsAuthenticated(true);
+      setUser(JSON.parse(storedUser));
     }
     setLoading(false);
   }, []);
 
-  const login = (username, password) => {
-    if (username === 'admin' && password === 'admin123') {
+  const login = async (username, password) => {
+    try {
+      const data = await adminApi.login(username, password);
+      localStorage.setItem('chronicle_admin_access_token', data.tokens.access);
+      localStorage.setItem('chronicle_admin_refresh_token', data.tokens.refresh);
+      localStorage.setItem('chronicle_admin_user', JSON.stringify(data.user));
       setIsAuthenticated(true);
-      localStorage.setItem('chronicle_admin_auth', 'true');
+      setUser(data.user);
       return true;
+    } catch (err) {
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
+    localStorage.removeItem('chronicle_admin_access_token');
+    localStorage.removeItem('chronicle_admin_refresh_token');
+    localStorage.removeItem('chronicle_admin_user');
     setIsAuthenticated(false);
-    localStorage.removeItem('chronicle_admin_auth');
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, login, logout, loading }}>
+    <AuthContext.Provider value={{ isAuthenticated, user, login, logout, loading }}>
       {children}
     </AuthContext.Provider>
   );

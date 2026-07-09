@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { opportunities, bulletins } from '../data/mockData';
+import useApi from '../hooks/useApi';
 import OpportunityCard from '../components/OpportunityCard';
 import FilterPanel from '../components/FilterPanel';
 import BulletinPanel from '../components/BulletinPanel';
 
 function Dashboard() {
   const [searchParams] = useSearchParams();
-  const [filteredOpportunities, setFilteredOpportunities] = useState(opportunities);
+  const { data: opportunities, loading: jobsLoading } = useApi('/jobs/');
+  const { data: bulletins } = useApi('/bulletins/');
+
+  const [filteredOpportunities, setFilteredOpportunities] = useState([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState({
     type: searchParams.get('type') || '',
@@ -18,20 +21,17 @@ function Dashboard() {
   useEffect(() => {
     let filtered = opportunities;
 
-    // Apply filters
     if (filters.type) {
       filtered = filtered.filter(opp => opp.type === filters.type);
     }
     if (filters.location) {
-      filtered = filtered.filter(opp => 
+      filtered = filtered.filter(opp =>
         opp.location.toLowerCase().includes(filters.location.toLowerCase())
       );
     }
     if (filters.domain) {
       filtered = filtered.filter(opp => opp.domain === filters.domain);
     }
-
-    // Apply search
     if (searchQuery) {
       filtered = filtered.filter(opp =>
         opp.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -41,7 +41,7 @@ function Dashboard() {
     }
 
     setFilteredOpportunities(filtered);
-  }, [filters, searchQuery]);
+  }, [filters, searchQuery, opportunities]);
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-8">
@@ -68,11 +68,17 @@ function Dashboard() {
         <section className="lg:col-span-6">
           <div className="border-b-4 border-retro-black mb-4 pb-2">
             <h2 className="retro-heading text-2xl">
-              {filteredOpportunities.length} Opportunities Found
+              {jobsLoading ? 'Loading...' : `${filteredOpportunities.length} Opportunities Found`}
             </h2>
           </div>
-          
-          {filteredOpportunities.length === 0 ? (
+
+          {jobsLoading ? (
+            <div className="retro-card text-center py-12">
+              <p className="font-sans text-lg text-retro-brown animate-pulse">
+                Loading opportunities from Chronicle...
+              </p>
+            </div>
+          ) : filteredOpportunities.length === 0 ? (
             <div className="retro-card text-center py-12">
               <p className="font-sans text-lg text-retro-brown">
                 No opportunities match your criteria. Try adjusting your filters.

@@ -6,17 +6,21 @@ function Login() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-    
-    if (login(username, password)) {
+    setLoading(true);
+    const success = await login(username, password);
+    setLoading(false);
+
+    if (success) {
       navigate('/dashboard');
     } else {
-      setError('Invalid credentials. Use admin / admin123');
+      setError('Invalid credentials. Make sure the Django server is running on port 8000.');
     }
   };
 
@@ -54,13 +58,13 @@ function Login() {
           </div>
 
           {error && (
-            <div className="mb-4 p-3 bg-admin-red text-white border-2 border-admin-black">
+            <div className="mb-4 p-3 bg-admin-red text-white border-2 border-admin-black text-sm">
               {error}
             </div>
           )}
 
-          <button type="submit" className="admin-btn-primary w-full">
-            LOGIN
+          <button type="submit" disabled={loading} className="admin-btn-primary w-full">
+            {loading ? 'LOGGING IN...' : 'LOGIN'}
           </button>
         </form>
 
@@ -68,7 +72,9 @@ function Login() {
           <p className="text-xs text-admin-dark">
             <strong>Default Credentials:</strong><br />
             Username: admin<br />
-            Password: admin123
+            Password: admin123<br />
+            <br />
+            <strong>Note:</strong> Django backend must be running on <code>localhost:8000</code>
           </p>
         </div>
       </div>

@@ -1,0 +1,1 @@
+# Chronicle Django project

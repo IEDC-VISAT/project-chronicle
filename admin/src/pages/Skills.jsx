@@ -12,22 +12,24 @@ function Skills() {
     category: 'Programming',
     difficulty: 'Beginner',
     description: '',
-    howToLearn: '',
-    whereToLearn: '',
+    how_to_learn: '',
+    where_to_learn: '',
     tags: '',
     trending: false,
-    editorsPick: false
+    editors_pick: false
   });
 
   const handleEdit = (skill) => {
     setEditingSkill(skill);
     setFormData({
       ...skill,
-      howToLearn: Array.isArray(skill.howToLearn) ? skill.howToLearn.join('\n') : '',
-      whereToLearn: Array.isArray(skill.whereToLearn) 
-        ? skill.whereToLearn.map(r => `${r.name}|${r.type}|${r.url}`).join('\n')
+      // API returns snake_case arrays
+      how_to_learn: Array.isArray(skill.how_to_learn) ? skill.how_to_learn.join('\n') : '',
+      where_to_learn: Array.isArray(skill.where_to_learn)
+        ? skill.where_to_learn.map(r => `${r.name}|${r.type}|${r.url}`).join('\n')
         : '',
-      tags: Array.isArray(skill.tags) ? skill.tags.join(', ') : ''
+      tags: Array.isArray(skill.tags) ? skill.tags.join(', ') : '',
+      editors_pick: skill.editors_pick || false,
     });
     setIsModalOpen(true);
   };
@@ -42,9 +44,14 @@ function Skills() {
     e.preventDefault();
     
     const skillData = {
-      ...formData,
-      howToLearn: formData.howToLearn.split('\n').filter(s => s.trim()),
-      whereToLearn: formData.whereToLearn.split('\n').filter(s => s.trim()).map(line => {
+      name: formData.name,
+      category: formData.category,
+      difficulty: formData.difficulty,
+      description: formData.description,
+      trending: formData.trending,
+      editors_pick: formData.editors_pick,
+      how_to_learn: formData.how_to_learn.split('\n').filter(s => s.trim()),
+      where_to_learn: formData.where_to_learn.split('\n').filter(s => s.trim()).map(line => {
         const [name, type, url] = line.split('|');
         return { name: name?.trim() || '', type: type?.trim() || '', url: url?.trim() || '' };
       }),
@@ -68,11 +75,11 @@ function Skills() {
       category: 'Programming',
       difficulty: 'Beginner',
       description: '',
-      howToLearn: '',
-      whereToLearn: '',
+      how_to_learn: '',
+      where_to_learn: '',
       tags: '',
       trending: false,
-      editorsPick: false
+      editors_pick: false
     });
   };
 
@@ -101,7 +108,7 @@ function Skills() {
       render: (value, row) => (
         <div className="flex gap-1">
           {row.trending && <span className="text-xs">🔥</span>}
-          {row.editorsPick && <span className="text-xs">⭐</span>}
+          {row.editors_pick && <span className="text-xs">⭐</span>}
         </div>
       )
     }
@@ -197,8 +204,8 @@ function Skills() {
           <div className="mb-4">
             <label className="block font-bold mb-2 text-sm">How to Learn (one step per line)</label>
             <textarea
-              value={formData.howToLearn}
-              onChange={(e) => setFormData({ ...formData, howToLearn: e.target.value })}
+              value={formData.how_to_learn}
+              onChange={(e) => setFormData({ ...formData, how_to_learn: e.target.value })}
               className="admin-input"
               rows="5"
               placeholder="Step 1: Learn basics&#10;Step 2: Practice&#10;..."
@@ -208,8 +215,8 @@ function Skills() {
           <div className="mb-4">
             <label className="block font-bold mb-2 text-sm">Where to Learn (format: Name|Type|URL, one per line)</label>
             <textarea
-              value={formData.whereToLearn}
-              onChange={(e) => setFormData({ ...formData, whereToLearn: e.target.value })}
+              value={formData.where_to_learn}
+              onChange={(e) => setFormData({ ...formData, where_to_learn: e.target.value })}
               className="admin-input"
               rows="4"
               placeholder="Official Docs|Documentation|https://example.com&#10;YouTube Course|Video|https://youtube.com"
@@ -240,8 +247,8 @@ function Skills() {
             <label className="flex items-center gap-2">
               <input
                 type="checkbox"
-                checked={formData.editorsPick}
-                onChange={(e) => setFormData({ ...formData, editorsPick: e.target.checked })}
+                checked={formData.editors_pick}
+                onChange={(e) => setFormData({ ...formData, editors_pick: e.target.checked })}
                 className="w-4 h-4"
               />
               <span className="font-bold text-sm">Editor's Pick</span>

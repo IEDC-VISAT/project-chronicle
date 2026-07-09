@@ -1,10 +1,19 @@
 import React, { useState } from 'react';
-import { skills, categories } from '../data/skills';
+import useApi from '../hooks/useApi';
 import SkillCard from '../components/SkillCard';
 
+// Derive unique categories from fetched data
+function getCategories(skills) {
+  const cats = [...new Set(skills.map(s => s.category))];
+  return ['All', ...cats];
+}
+
 function SkillCorner() {
+  const { data: skills, loading } = useApi('/skills/');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
+
+  const categories = getCategories(skills);
 
   const filteredSkills = skills.filter(skill => {
     const matchesCategory = selectedCategory === 'All' || skill.category === selectedCategory;
@@ -12,6 +21,14 @@ function SkillCorner() {
                          skill.description.toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCategory && matchesSearch;
   });
+
+  // Normalize API field names to match SkillCard expectations
+  const normalizedSkills = filteredSkills.map(s => ({
+    ...s,
+    editorsPick: s.editors_pick,
+    howToLearn: s.how_to_learn,
+    whereToLearn: s.where_to_learn,
+  }));
 
   return (
     <main className="max-w-7xl mx-auto px-4 py-8">
@@ -47,9 +64,7 @@ function SkillCorner() {
             <button
               key={category}
               onClick={() => setSelectedCategory(category)}
-              className={`retro-btn ${
-                selectedCategory === category ? 'bg-retro-black text-white' : ''
-              }`}
+              className={`retro-btn ${selectedCategory === category ? 'bg-retro-black text-white' : ''}`}
             >
               {category}
             </button>
@@ -60,11 +75,17 @@ function SkillCorner() {
       {/* Skills Grid */}
       <div className="border-b-4 border-retro-black mb-4 pb-2">
         <h2 className="retro-heading text-2xl">
-          {filteredSkills.length} Skills Found
+          {loading ? 'Loading...' : `${normalizedSkills.length} Skills Found`}
         </h2>
       </div>
 
-      {filteredSkills.length === 0 ? (
+      {loading ? (
+        <div className="retro-card text-center py-12">
+          <p className="font-sans text-lg text-retro-brown animate-pulse">
+            Loading skills...
+          </p>
+        </div>
+      ) : normalizedSkills.length === 0 ? (
         <div className="retro-card text-center py-12">
           <p className="font-sans text-lg text-retro-brown">
             No skills match your search. Try different keywords or categories.
@@ -72,7 +93,7 @@ function SkillCorner() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredSkills.map(skill => (
+          {normalizedSkills.map(skill => (
             <SkillCard key={skill.id} skill={skill} />
           ))}
         </div>

@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
+import { useAuth } from '../context/AuthContext';
 
 function Settings() {
-  const { data } = useData();
+  const { data, loadAll } = useData();
+  const { user, logout } = useAuth();
   const [showSuccess, setShowSuccess] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const handleExport = () => {
     const dataStr = JSON.stringify(data, null, 2);
@@ -13,17 +16,18 @@ function Settings() {
     link.href = url;
     link.download = 'chronicle26_data.json';
     link.click();
-    
     setShowSuccess(true);
     setTimeout(() => setShowSuccess(false), 3000);
   };
 
-  const handleClearData = () => {
-    if (window.confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
-      localStorage.removeItem('chronicle_admin_data');
-      window.location.reload();
-    }
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadAll();
+    setRefreshing(false);
+    setShowSuccess(true);
+    setTimeout(() => setShowSuccess(false), 3000);
   };
+
 
   const stats = [
     { label: 'Total Jobs', value: data.jobs.length },

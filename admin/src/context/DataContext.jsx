@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import adminApi from '../utils/api';
 
 const DataContext = createContext();
 
@@ -6,60 +7,92 @@ export function useData() {
   return useContext(DataContext);
 }
 
+// Map category names to API endpoint paths
+const CATEGORY_ENDPOINTS = {
+  jobs: '/jobs/',
+  bulletins: '/bulletins/',
+  skills: '/skills/',
+  roadmaps: '/roadmaps/',
+  templates: '/toolkit/templates/',
+  prompts: '/toolkit/prompts/',
+  linkedin: '/toolkit/linkedin/',
+  countries: '/flysky/countries/',
+  universities: '/flysky/universities/',
+  internships: '/flysky/internships/',
+};
+
 const initialData = {
   jobs: [],
+  bulletins: [],
   skills: [],
   roadmaps: [],
-  bulletins: [],
-  countries: [],
-  internships: [],
   templates: [],
-  prompts: []
+  prompts: [],
+  linkedin: [],
+  countries: [],
+  universities: [],
+  internships: [],
 };
 
 export function DataProvider({ children }) {
   const [data, setData] = useState(initialData);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const stored = localStorage.getItem('chronicle_admin_data');
-    if (stored) {
-      setData(JSON.parse(stored));
+  // Load all data from the Django API
+  const loadAll = useCallback(async () => {
+    setLoading(true);
+    try {
+      const results = await Promise.all(
+        Object.entries(CATEGORY_ENDPOINTS).map(async ([key, endpoint]) => {
+          const res = await adminApi.get(endpoint);
+          const items = Array.isArray(res) ? res : res.results ?? [];
+          return [key, items];
+        })
+      );
+      setData(Object.fromEntries(results));
+    } catch (err) {
+      console.error('Failed to load data:', err);
+    } finally {
+      setLoading(false);
     }
   }, []);
 
-  const saveData = (newData) => {
-    setData(newData);
-    localStorage.setItem('chronicle_admin_data', JSON.stringify(newData));
+  useEffect(() => { loadAll(); }, [loadAll]);
+
+  // Add item via POST
+  const addItem = async (category, item) => {
+    const endpoint = CATEGORY_ENDPOINTS[category];
+    if (!endpoint) return;
+    const created = await adminApi.post(endpoint, item);
+    setData(prev => ({ ...prev, [category]: [...prev[category], created] }));
+    return created;
   };
 
-  const addItem = (category, item) => {
-    const newData = {
-      ...data,
-      [category]: [...data[category], { ...item, id: Date.now() }]
-    };
-    saveData(newData);
+  // Update item via PUT
+  const updateItem = async (category, id, updatedItem) => {
+    const endpoint = CATEGORY_ENDPOINTS[category];
+    if (!endpoint) return;
+    const updated = await adminApi.put(`${endpoint}${id}/`, updatedItem);
+    setData(prev => ({
+      ...prev,
+      [category]: prev[category].map(item => item.id === id ? updated : item),
+    }));
+    return updated;
   };
 
-  const updateItem = (category, id, updatedItem) => {
-    const newData = {
-      ...data,
-      [category]: data[category].map(item => 
-        item.id === id ? { ...updatedItem, id } : item
-      )
-    };
-    saveData(newData);
-  };
-
-  const deleteItem = (category, id) => {
-    const newData = {
-      ...data,
-      [category]: data[category].filter(item => item.id !== id)
-    };
-    saveData(newData);
+  // Delete item via DELETE
+  const deleteItem = async (category, id) => {
+    const endpoint = CATEGORY_ENDPOINTS[category];
+    if (!endpoint) return;
+    await adminApi.delete(`${endpoint}${id}/`);
+    setData(prev => ({
+      ...prev,
+      [category]: prev[category].filter(item => item.id !== id),
+    }));
   };
 
   return (
-    <DataContext.Provider value={{ data, addItem, updateItem, deleteItem }}>
+    <DataContext.Provider value={{ data, loading, loadAll, addItem, updateItem, deleteItem }}>
       {children}
     </DataContext.Provider>
   );

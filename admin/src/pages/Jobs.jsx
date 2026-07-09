@@ -16,7 +16,7 @@ function Jobs() {
     description: '',
     requirements: '',
     responsibilities: '',
-    applyLink: '',
+    apply_link: '',
     urgent: false
   });
 
@@ -24,8 +24,11 @@ function Jobs() {
     setEditingJob(job);
     setFormData({
       ...job,
+      // API returns arrays; convert to newline strings for textarea
       requirements: Array.isArray(job.requirements) ? job.requirements.join('\n') : '',
-      responsibilities: Array.isArray(job.responsibilities) ? job.responsibilities.join('\n') : ''
+      responsibilities: Array.isArray(job.responsibilities) ? job.responsibilities.join('\n') : '',
+      // API returns snake_case; map to form field
+      apply_link: job.apply_link || '',
     });
     setIsModalOpen(true);
   };
@@ -38,12 +41,18 @@ function Jobs() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     const jobData = {
-      ...formData,
+      title: formData.title,
+      company: formData.company,
+      type: formData.type,
+      location: formData.location,
+      domain: formData.domain,
+      description: formData.description,
+      urgent: formData.urgent,
+      apply_link: formData.apply_link,
       requirements: formData.requirements.split('\n').filter(r => r.trim()),
       responsibilities: formData.responsibilities.split('\n').filter(r => r.trim()),
-      postedDate: new Date().toISOString().split('T')[0]
     };
 
     if (editingJob) {
@@ -63,7 +72,7 @@ function Jobs() {
       description: '',
       requirements: '',
       responsibilities: '',
-      applyLink: '',
+      apply_link: '',
       urgent: false
     });
   };
@@ -226,8 +235,8 @@ function Jobs() {
             <label className="block font-bold mb-2 text-sm">Apply Link</label>
             <input
               type="url"
-              value={formData.applyLink}
-              onChange={(e) => setFormData({ ...formData, applyLink: e.target.value })}
+              value={formData.apply_link}
+              onChange={(e) => setFormData({ ...formData, apply_link: e.target.value })}
               className="admin-input"
               placeholder="https://example.com/apply"
             />

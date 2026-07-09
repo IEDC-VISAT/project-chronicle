@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../utils/api';
 
 const AuthContext = createContext();
 
@@ -14,105 +15,68 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check for existing session on mount
+  // Restore session from stored tokens on mount
   useEffect(() => {
-    const currentUser = localStorage.getItem('chronicle_current_user');
-    if (currentUser) {
+    const token = localStorage.getItem('chronicle_access_token');
+    const stored = localStorage.getItem('chronicle_current_user');
+    if (token && stored) {
       try {
-        setUser(JSON.parse(currentUser));
-      } catch (error) {
-        console.error('Error parsing user data:', error);
+        setUser(JSON.parse(stored));
+      } catch {
         localStorage.removeItem('chronicle_current_user');
+        localStorage.removeItem('chronicle_access_token');
+        localStorage.removeItem('chronicle_refresh_token');
       }
     }
     setLoading(false);
   }, []);
 
-  // Signup function
+  // Signup function — calls Django /api/auth/register/
   const signup = async (name, email, password) => {
     try {
-      // Get existing users
-      const usersData = localStorage.getItem('chronicle_users');
-      const users = usersData ? JSON.parse(usersData) : [];
-
-      // Check if email already exists
-      const existingUser = users.find(u => u.email.toLowerCase() === email.toLowerCase());
-      if (existingUser) {
-        throw new Error('User with this email already exists');
-      }
-
-      // Create new user
-      const newUser = {
-        id: Date.now().toString(),
-        name,
-        email,
-        password, // In production, this would be hashed
-        createdAt: new Date().toISOString()
-      };
-
-      // Add to users array
-      users.push(newUser);
-      localStorage.setItem('chronicle_users', JSON.stringify(users));
-
-      return { success: true, message: 'Account created successfully!' };
-    } catch (error) {
-      return { success: false, message: error.message };
+      const data = await api.register(name, email, password);
+      return { success: true, message: 'Account created successfully! Please log in.' };
+    } catch (err) {
+      const msg = err.email?.[0] || err.password?.[0] || err.error || 'Registration failed';
+      return { success: false, message: msg };
     }
   };
 
-  // Login function
+  // Login function — calls Django /api/auth/login/
   const login = async (email, password) => {
     try {
-      // Get users from localStorage
-      const usersData = localStorage.getItem('chronicle_users');
-      const users = usersData ? JSON.parse(usersData) : [];
+      const data = await api.login(email, password);
+      const { tokens, user: userData } = data;
 
-      // Find user with matching credentials
-      const user = users.find(
-        u => u.email.toLowerCase() === email.toLowerCase() && u.password === password
-      );
+      localStorage.setItem('chronicle_access_token', tokens.access);
+      localStorage.setItem('chronicle_refresh_token', tokens.refresh);
 
-      if (!user) {
-        throw new Error('Invalid email or password');
-      }
-
-      // Create user session (exclude password from session)
       const userSession = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        createdAt: user.createdAt
+        id: userData.id,
+        name: userData.first_name || userData.username,
+        email: userData.email,
+        createdAt: userData.date_joined,
       };
-
-      // Save current user
       localStorage.setItem('chronicle_current_user', JSON.stringify(userSession));
       setUser(userSession);
 
       return { success: true, user: userSession };
-    } catch (error) {
-      return { success: false, message: error.message };
+    } catch (err) {
+      return { success: false, message: err.error || 'Invalid email or password' };
     }
   };
 
-  // Logout function
+  // Logout
   const logout = () => {
+    localStorage.removeItem('chronicle_access_token');
+    localStorage.removeItem('chronicle_refresh_token');
     localStorage.removeItem('chronicle_current_user');
     setUser(null);
   };
 
-  // Check if user is authenticated
-  const isAuthenticated = () => {
-    return user !== null;
-  };
+  const isAuthenticated = () => user !== null;
 
-  const value = {
-    user,
-    loading,
-    signup,
-    login,
-    logout,
-    isAuthenticated
-  };
+  const value = { user, loading, signup, login, logout, isAuthenticated };
 
   return (
     <AuthContext.Provider value={value}>
