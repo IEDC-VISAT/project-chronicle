@@ -1,63 +1,93 @@
-const BASE_URL = 'http://localhost:8000/api';
+const USER_STORAGE_KEY = 'chronicle_users';
+const SESSION_STORAGE_KEY = 'chronicle_current_user';
 
-function getToken() {
-  return localStorage.getItem('chronicle_access_token');
-}
+const DEFAULT_ADMIN = {
+  id: 'srikar-admin-id-26',
+  email: 'srikarch248@gmail.com',
+  password: 'srikar@4267CH',
+  first_name: 'Srikar',
+  role: 'admin',
+  date_joined: new Date().toISOString()
+};
 
-async function request(method, endpoint, body = null, requiresAuth = false) {
-  const headers = { 'Content-Type': 'application/json' };
-
-  if (requiresAuth) {
-    const token = getToken();
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-  }
-
-  const config = { method, headers };
-  if (body) config.body = JSON.stringify(body);
-
-  const response = await fetch(`${BASE_URL}${endpoint}`, config);
-
-  // Auto-refresh token if expired
-  if (response.status === 401 && requiresAuth) {
-    const refreshToken = localStorage.getItem('chronicle_refresh_token');
-    if (refreshToken) {
-      const refreshRes = await fetch(`${BASE_URL}/auth/refresh/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refresh: refreshToken }),
-      });
-      if (refreshRes.ok) {
-        const data = await refreshRes.json();
-        localStorage.setItem('chronicle_access_token', data.access);
-        headers['Authorization'] = `Bearer ${data.access}`;
-        const retryConfig = { method, headers };
-        if (body) retryConfig.body = JSON.stringify(body);
-        return fetch(`${BASE_URL}${endpoint}`, retryConfig).then(r => r.json());
-      }
+function getUsers() {
+  const stored = localStorage.getItem(USER_STORAGE_KEY);
+  if (stored) {
+    try {
+      return JSON.parse(stored);
+    } catch {
+      // ignore parsing errors and return empty/default
     }
   }
+  const defaultUsers = [DEFAULT_ADMIN];
+  localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(defaultUsers));
+  return defaultUsers;
+}
 
-  if (!response.ok) {
-    const err = await response.json().catch(() => ({ error: 'Request failed' }));
-    throw err;
-  }
-
-  if (response.status === 204) return null;
-  return response.json();
+function saveUsers(users) {
+  localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(users));
 }
 
 export const api = {
-  get: (endpoint) => request('GET', endpoint),
-  post: (endpoint, body) => request('POST', endpoint, body),
-  patch: (endpoint, body) => request('PATCH', endpoint, body, true),
-  delete: (endpoint) => request('DELETE', endpoint, null, true),
+  register: async (name, email, password) => {
+    const users = getUsers();
+    const cleanEmail = email.trim().toLowerCase();
+    
+    if (users.some(u => u.email === cleanEmail)) {
+      throw { email: ['A user with this email already exists.'] };
+    }
 
-  // Auth
-  register: (name, email, password) =>
-    request('POST', '/auth/register/', { first_name: name, email, password }),
-  login: (email, password) =>
-    request('POST', '/auth/login/', { email, password }),
-  me: () => request('GET', '/auth/me/', null, true),
+    const newUser = {
+      id: Math.random().toString(36).substr(2, 9),
+      email: cleanEmail,
+      password, // Note: In a pure client-side mockup, we store password as-is
+      first_name: name,
+      role: 'user',
+      date_joined: new Date().toISOString()
+    };
+
+    users.push(newUser);
+    saveUsers(users);
+    return newUser;
+  },
+
+  login: async (email, password) => {
+    const users = getUsers();
+    const cleanEmail = email.trim().toLowerCase();
+    const found = users.find(u => u.email === cleanEmail && u.password === password);
+
+    if (!found) {
+      throw { error: 'Invalid email or password' };
+    }
+
+    const sessionUser = {
+      id: found.id,
+      email: found.email,
+      first_name: found.first_name,
+      username: found.email,
+      date_joined: found.date_joined,
+      role: found.role
+    };
+
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(sessionUser));
+    return {
+      user: sessionUser,
+      tokens: {
+        access: 'mock-access-token',
+        refresh: 'mock-refresh-token'
+      }
+    };
+  },
+
+  me: async () => {
+    const session = localStorage.getItem(SESSION_STORAGE_KEY);
+    if (!session) throw new Error('Not authenticated');
+    return JSON.parse(session);
+  },
+
+  logout: async () => {
+    localStorage.removeItem(SESSION_STORAGE_KEY);
+  }
 };
 
 export default api;

@@ -7,7 +7,6 @@ export function useData() {
   return useContext(DataContext);
 }
 
-// Map category names to API endpoint paths
 const CATEGORY_ENDPOINTS = {
   jobs: '/jobs/',
   bulletins: '/bulletins/',
@@ -38,15 +37,14 @@ export function DataProvider({ children }) {
   const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(true);
 
-  // Load all data from the Django API
+  // Load all data from Local Storage via adminApi
   const loadAll = useCallback(async () => {
     setLoading(true);
     try {
       const results = await Promise.all(
         Object.entries(CATEGORY_ENDPOINTS).map(async ([key, endpoint]) => {
           const res = await adminApi.get(endpoint);
-          const items = Array.isArray(res) ? res : res.results ?? [];
-          return [key, items];
+          return [key, res];
         })
       );
       setData(Object.fromEntries(results));
@@ -57,9 +55,21 @@ export function DataProvider({ children }) {
     }
   }, []);
 
-  useEffect(() => { loadAll(); }, [loadAll]);
+  useEffect(() => {
+    loadAll();
+    
+    // Listen for storage update events to reactively refresh state
+    const handleStorageUpdate = () => {
+      loadAll();
+    };
+    
+    window.addEventListener('chronicle_storage_update', handleStorageUpdate);
+    return () => {
+      window.removeEventListener('chronicle_storage_update', handleStorageUpdate);
+    };
+  }, [loadAll]);
 
-  // Add item via POST
+  // Add item via Local Storage
   const addItem = async (category, item) => {
     const endpoint = CATEGORY_ENDPOINTS[category];
     if (!endpoint) return;
@@ -68,7 +78,7 @@ export function DataProvider({ children }) {
     return created;
   };
 
-  // Update item via PUT
+  // Update item via Local Storage
   const updateItem = async (category, id, updatedItem) => {
     const endpoint = CATEGORY_ENDPOINTS[category];
     if (!endpoint) return;
@@ -80,7 +90,7 @@ export function DataProvider({ children }) {
     return updated;
   };
 
-  // Delete item via DELETE
+  // Delete item via Local Storage
   const deleteItem = async (category, id) => {
     const endpoint = CATEGORY_ENDPOINTS[category];
     if (!endpoint) return;

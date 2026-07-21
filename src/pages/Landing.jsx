@@ -1,11 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { opportunities } from '../data/mockData';
+import useApi from '../hooks/useApi';
 import OpportunityCard from '../components/OpportunityCard';
 
 function Landing() {
   const { user } = useAuth();
+  const { data: opportunities } = useApi('/jobs/');
   const featuredOpportunities = opportunities.filter(opp => opp.urgent).slice(0, 3);
   const latestOpportunities = opportunities.slice(0, 6);
 

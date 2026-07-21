@@ -15,26 +15,29 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore session from stored tokens on mount
+  // Restore session on mount
   useEffect(() => {
-    const token = localStorage.getItem('chronicle_access_token');
     const stored = localStorage.getItem('chronicle_current_user');
-    if (token && stored) {
+    if (stored) {
       try {
-        setUser(JSON.parse(stored));
+        const sessionUser = JSON.parse(stored);
+        setUser({
+          id: sessionUser.id,
+          name: sessionUser.first_name || sessionUser.email.split('@')[0],
+          email: sessionUser.email,
+          createdAt: sessionUser.date_joined,
+        });
       } catch {
         localStorage.removeItem('chronicle_current_user');
-        localStorage.removeItem('chronicle_access_token');
-        localStorage.removeItem('chronicle_refresh_token');
       }
     }
     setLoading(false);
   }, []);
 
-  // Signup function — calls Django /api/auth/register/
+  // Signup function — uses Local Storage api
   const signup = async (name, email, password) => {
     try {
-      const data = await api.register(name, email, password);
+      await api.register(name, email, password);
       return { success: true, message: 'Account created successfully! Please log in.' };
     } catch (err) {
       const msg = err.email?.[0] || err.password?.[0] || err.error || 'Registration failed';
@@ -42,24 +45,20 @@ export function AuthProvider({ children }) {
     }
   };
 
-  // Login function — calls Django /api/auth/login/
+  // Login function — uses Local Storage api
   const login = async (email, password) => {
     try {
       const data = await api.login(email, password);
-      const { tokens, user: userData } = data;
-
-      localStorage.setItem('chronicle_access_token', tokens.access);
-      localStorage.setItem('chronicle_refresh_token', tokens.refresh);
-
+      const userData = data.user;
+      
       const userSession = {
         id: userData.id,
-        name: userData.first_name || userData.username,
+        name: userData.first_name || userData.email.split('@')[0],
         email: userData.email,
         createdAt: userData.date_joined,
       };
-      localStorage.setItem('chronicle_current_user', JSON.stringify(userSession));
+      
       setUser(userSession);
-
       return { success: true, user: userSession };
     } catch (err) {
       return { success: false, message: err.error || 'Invalid email or password' };
@@ -67,10 +66,8 @@ export function AuthProvider({ children }) {
   };
 
   // Logout
-  const logout = () => {
-    localStorage.removeItem('chronicle_access_token');
-    localStorage.removeItem('chronicle_refresh_token');
-    localStorage.removeItem('chronicle_current_user');
+  const logout = async () => {
+    await api.logout();
     setUser(null);
   };
 

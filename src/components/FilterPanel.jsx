@@ -1,7 +1,6 @@
 import React from 'react';
-import { opportunities } from '../data/mockData';
 
-function FilterPanel({ filters, setFilters }) {
+function FilterPanel({ filters, setFilters, opportunities = [] }) {
   const uniqueLocations = [...new Set(opportunities.map(opp => opp.location))];
   const uniqueDomains = [...new Set(opportunities.map(opp => opp.domain))];
 

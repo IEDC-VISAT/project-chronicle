@@ -1,10 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { opportunities } from '../data/mockData';
-import { skills } from '../data/skills';
-import { studyAbroadCountries, internationalInternships } from '../data/flysky';
-import { universities } from '../data/universities';
-import { rolesList } from '../data/roadmaps';
+import useApi from '../hooks/useApi';
 import { useBookmarks } from '../hooks/useBookmarks';
 import OpportunityCard from '../components/OpportunityCard';
 import SkillCard from '../components/SkillCard';
@@ -12,6 +8,13 @@ import SkillCard from '../components/SkillCard';
 function Bookmarks() {
   const { getBookmarksByType, getAllBookmarksCount } = useBookmarks();
   const [activeTab, setActiveTab] = useState('opportunities');
+
+  const { data: opportunities } = useApi('/jobs/');
+  const { data: skills } = useApi('/skills/');
+  const { data: countries } = useApi('/flysky/countries/');
+  const { data: internships } = useApi('/flysky/internships/');
+  const { data: universities } = useApi('/flysky/universities/');
+  const { data: roadmaps } = useApi('/roadmaps/');
   
   const bookmarkedOpportunities = opportunities.filter(opp => 
     getBookmarksByType('opportunities').includes(opp.id)
@@ -21,27 +24,21 @@ function Bookmarks() {
     getBookmarksByType('skills').includes(skill.id)
   );
 
-  const bookmarkedCountries = studyAbroadCountries.filter(country =>
+  const bookmarkedCountries = countries.filter(country =>
     getBookmarksByType('countries').includes(country.id)
   );
 
-  const bookmarkedInternships = internationalInternships.filter(internship =>
+  const bookmarkedInternships = internships.filter(internship =>
     getBookmarksByType('internships').includes(internship.id)
   );
 
-  const bookmarkedRoadmaps = rolesList.filter(role =>
-    getBookmarksByType('roadmaps').includes(role)
-  );
+  const bookmarkedRoadmaps = roadmaps
+    .map(r => r.role)
+    .filter(role => getBookmarksByType('roadmaps').includes(role));
 
-  // Get all bookmarked universities from all countries
-  const bookmarkedUniversities = [];
-  Object.values(universities).forEach(countryUniversities => {
-    countryUniversities.forEach(uni => {
-      if (getBookmarksByType('universities').includes(uni.id)) {
-        bookmarkedUniversities.push(uni);
-      }
-    });
-  });
+  const bookmarkedUniversities = universities.filter(uni =>
+    getBookmarksByType('universities').includes(uni.id)
+  );
 
   const totalBookmarks = getAllBookmarksCount();
 
@@ -267,7 +264,7 @@ function Bookmarks() {
                 <div key={uni.id} className="retro-card">
                   <h3 className="retro-heading text-lg mb-2">{uni.name}</h3>
                   <p className="font-sans text-sm text-retro-brown mb-3">
-                    📍 {uni.location} • {uni.ranking}
+                    📍 {uni.country} {uni.ranking ? `• Rank #${uni.ranking}` : ''}
                   </p>
                   <div className="grid grid-cols-2 gap-2 mb-3">
                     <div className="border-2 border-retro-black p-2 bg-retro-beige">
@@ -276,17 +273,12 @@ function Bookmarks() {
                     </div>
                     <div className="border-2 border-retro-black p-2 bg-retro-beige">
                       <p className="font-sans text-xs text-retro-brown">Acceptance</p>
-                      <p className="font-sans text-xs font-bold">{uni.acceptance}</p>
+                      <p className="font-sans text-xs font-bold">{uni.acceptance_rate}</p>
                     </div>
                   </div>
-                  <a
-                    href={uni.website}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="retro-btn-primary w-full text-center block no-underline text-sm"
-                  >
-                    VISIT WEBSITE →
-                  </a>
+                  <Link to="/flysky" className="retro-btn-primary w-full text-center block no-underline text-sm">
+                    VIEW DETAILS →
+                  </Link>
                 </div>
               ))}
             </div>

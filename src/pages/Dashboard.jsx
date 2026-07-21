@@ -61,7 +61,7 @@ function Dashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column - Filters */}
         <aside className="lg:col-span-3">
-          <FilterPanel filters={filters} setFilters={setFilters} />
+          <FilterPanel filters={filters} setFilters={setFilters} opportunities={opportunities} />
         </aside>
 
         {/* Center Column - Listings */}

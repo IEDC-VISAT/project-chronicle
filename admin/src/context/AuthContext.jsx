@@ -16,8 +16,13 @@ export function AuthProvider({ children }) {
     const token = localStorage.getItem('chronicle_admin_access_token');
     const storedUser = localStorage.getItem('chronicle_admin_user');
     if (token && storedUser) {
-      setIsAuthenticated(true);
-      setUser(JSON.parse(storedUser));
+      try {
+        setIsAuthenticated(true);
+        setUser(JSON.parse(storedUser));
+      } catch {
+        localStorage.removeItem('chronicle_admin_access_token');
+        localStorage.removeItem('chronicle_admin_user');
+      }
     }
     setLoading(false);
   }, []);
